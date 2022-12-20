@@ -1,8 +1,4 @@
-# video_id,frame_timestamp,entity_box_x1,entity_box_y1,entity_box_x2,entity_box_y2,label,entity_id,label_id,instance_id
-# 0b4cacb1-970f-4ef0-85da-371d81f899e0,2007,635.3,626.17,727.6899999999999,749.3499999999999,0,0b4cacb1-970f-4ef0-85da-371d81f899e0_2007_2048:2,0,0b4cacb1-970f-4ef0-85da-371d81f899e0_2007_2048:2:0
-# import pandas as pd
-# import random
-# df = pd.read_csv("./student_data/train/seg/0b4cacb1-970f-4ef0-85da-371d81f899e0_seg.csv")
+
 import os
 import csv
 seg_dir = "./student_data/test/seg"
@@ -11,6 +7,8 @@ bbox_dir = "./student_data/test/bbox"
 seg_files = sorted([os.path.join(seg_dir, x) for x in os.listdir(seg_dir)])
 bbox_files = sorted([os.path.join(bbox_dir, x) for x in os.listdir(bbox_dir)])
 output_dir = "test_merged.csv"
+if os.path.isfile(output_dir):
+    os.remove(output_dir)
 for k in range(len(seg_files)):
     # print(len(seg_files))
     video_name = seg_files[k].split("_")[-2].split("/")[-1]
@@ -38,8 +36,8 @@ for k in range(len(seg_files)):
             person_id.append(row[0])
             frame_id.append(row[1])
             x1.append(row[2])
-            x2.append(row[3])
-            y1.append(row[4])
+            y1.append(row[3])
+            x2.append(row[4])
             y2.append(row[5])
     video_id =[] 
     frame_timestamp =[]
@@ -53,19 +51,21 @@ for k in range(len(seg_files)):
     instance_id =[]
     # print(end_frame)
     for i in range(1,len(id)):
+        if i < 10 and k ==0:
+            print(int(end_frame[i]) - int(start_frame[i]) + 1)
         for j in range(int(end_frame[i]) - int(start_frame[i]) + 1):
             video_id.append(video_name)
             frame_timestamp.append(j + int(start_frame[i]))
-            entity_box_x1.append(x1[int(start_frame[i])+j])
-            entity_box_x2.append(x1[int(start_frame[i])+j])
-            entity_box_y1.append(y1[int(start_frame[i])+j])
-            entity_box_y2.append(y2[int(start_frame[i])+j])
+            entity_box_x1.append(x1[int(start_frame[i])+ j + 1])
+            entity_box_x2.append(x2[int(start_frame[i])+ j + 1])
+            entity_box_y1.append(y1[int(start_frame[i])+ j + 1])
+            entity_box_y2.append(y2[int(start_frame[i])+ j + 1])
             label.append(speaking[i])
-            entity_id.append(video_name+"_"+str(start_frame[i])+"_"+str(end_frame[i])+":"+str(id[i]))
+            entity_id.append(video_name+"_"+str(int(start_frame[i])/30)+"_"+str(int(end_frame[i])/30)+":"+str(id[i]))
             label_id.append(0)
-            instance_id.append(video_name+"_"+str(start_frame[i])+"_"+str(end_frame[i])+":"+str(id[i])+":"+str(0))
+            instance_id.append(video_name+"_"+str(int(start_frame[i])/30)+"_"+str(int(end_frame[i])/30)+":"+str(id[i])+":"+str(0))
     with open(output_dir, 'a') as f:
-        if k ==1 :
+        if k == 0 :
             f.write('video_id,frame_timestamp,entity_box_x1,entity_box_y1,entity_box_x2,entity_box_y2,label,entity_id,label_id,instance_id\n')
         for i in range(len(video_id)):
             if entity_box_x1[i] == "-1":
